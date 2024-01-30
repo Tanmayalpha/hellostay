@@ -75,13 +75,13 @@ class _SignUpScrState extends State<SignUpScr> {
                       height: 25,
                     ),
                     TextFormField(
-                      controller: ownernameController,
+                      controller: firstNmaeController,
                       decoration: InputDecoration(
                         prefixIcon: const Icon(
                           Icons.person,
                           color: AppColors.tabtextColor,
                         ),
-                        hintText: 'Owner Name',
+                        hintText: 'First Name',
                         hintStyle: const TextStyle(fontSize: 13),
                         contentPadding: const EdgeInsets.symmetric(vertical: 5),
                         focusedErrorBorder: OutlineInputBorder(
@@ -103,7 +103,87 @@ class _SignUpScrState extends State<SignUpScr> {
                       ),
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Please Enter Owner Name';
+                          return 'Please Enter First Name';
+                        }
+                        return null; // Return null if the input is valid
+                      },
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    TextFormField(
+                      controller: lastNmaecontroller,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.person,
+                          color: AppColors.tabtextColor,
+                        ),
+                        hintText: 'Last Name',
+                        hintStyle: const TextStyle(fontSize: 13),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                        focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: AppColors.whiteTemp),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please Enter Last Name';
+                        }
+                        return null; // Return null if the input is valid
+                      },
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+
+                    TextFormField(
+                      maxLength: 10,
+                      controller: mobilecontroller,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        counterText: "",
+                        prefixIcon: const Icon(
+                          Icons.call,
+                          color: AppColors.tabtextColor,
+                        ),
+                        hintText: 'Phone',
+                        hintStyle: const TextStyle(fontSize: 13),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                        focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: const BorderSide(
+                                color: AppColors.whiteTemp, width: 2)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: AppColors.whiteTemp),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please Enter Phone Number';
+                        } else if (value.length < 10) {
+                          return 'Please Enter Valid Phone Number';
                         }
                         return null; // Return null if the input is valid
                       },
@@ -148,181 +228,140 @@ class _SignUpScrState extends State<SignUpScr> {
                         return null; // Return null if the input is valid
                       },
                     ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    TextFormField(
-                      maxLength: 10,
-                      controller: mobilecontroller,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        counterText: "",
-                        prefixIcon: const Icon(
-                          Icons.call,
-                          color: AppColors.tabtextColor,
-                        ),
-                        hintText: 'Mobile Number',
-                        hintStyle: const TextStyle(fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-                        focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.whiteTemp),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter Mobile Number';
-                        } else if (value.length < 10) {
-                          return 'Please Enter Valid Mobile Number';
-                        }
-                        return null; // Return null if the input is valid
-                      },
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                            MediaQuery.of(context).size.width / 2),
-                        border:
-                            Border.all(width: 2, color: AppColors.whiteTemp),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Icon(
-                            Icons.map,
-                            color: AppColors.tabtextColor,
-                          ),
-                          DropdownButtonHideUnderline(
-                            child: DropdownButton2(
-                              hint: SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width / 1.7,
-                                child: const Text(
-                                  'Select Gender',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                      color: AppColors.tabtextColor,
-                                      fontSize: 13),
-                                ),
-                              ), // Not necessary for Option 1
-                              value: _selectvehiclecat,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  _selectvehiclecat = newValue.toString();
-                                });
-                              },
-                              items: selectVehicleList.map((location) {
-                                return DropdownMenuItem(
-                                  value: location,
-                                  child:  Text(location),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    TextFormField(
-                      controller: registrationNoController,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.car_crash_outlined,
-                          color: AppColors.tabtextColor,
-                        ),
-                        hintText: 'Registration No',
-                        hintStyle: const TextStyle(fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-                        focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.whiteTemp),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter Registration No';
-                        }
-                        return null; // Return null if the input is valid
-                      },
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    TextFormField(
-                      onTap: () {
-                        showPlacePicker();
-                      },
-                      readOnly: true,
-                      controller: addressController,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.location_on,
-                          color: AppColors.tabtextColor,
-                        ),
-                        hintText: 'Address',
-                        hintStyle: const TextStyle(fontSize: 13),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-                        focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: const BorderSide(
-                                color: AppColors.whiteTemp, width: 2)),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.whiteTemp),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Enter Address';
-                        }
-                        return null; // Return null if the input is valid
-                      },
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
+                    // const SizedBox(
+                    //   height: 8,
+                    // ),
+                    //
+                    // Container(
+                    //   height: 50,
+                    //   width: MediaQuery.of(context).size.width,
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(
+                    //         MediaQuery.of(context).size.width / 2),
+                    //     border:
+                    //         Border.all(width: 2, color: AppColors.whiteTemp),
+                    //   ),
+                    //   child: Row(
+                    //     children: [
+                    //       const SizedBox(
+                    //         width: 10,
+                    //       ),
+                    //       const Icon(
+                    //         Icons.map,
+                    //         color: AppColors.tabtextColor,
+                    //       ),
+                    //       DropdownButtonHideUnderline(
+                    //         child: DropdownButton2(
+                    //           hint: SizedBox(
+                    //             width:
+                    //                 MediaQuery.of(context).size.width / 1.7,
+                    //             child: const Text(
+                    //               'Select Gender',
+                    //               overflow: TextOverflow.ellipsis,
+                    //               maxLines: 1,
+                    //               style: TextStyle(
+                    //                   color: AppColors.tabtextColor,
+                    //                   fontSize: 13),
+                    //             ),
+                    //           ), // Not necessary for Option 1
+                    //           value: _selectvehiclecat,
+                    //           onChanged: (newValue) {
+                    //             setState(() {
+                    //               _selectvehiclecat = newValue.toString();
+                    //             });
+                    //           },
+                    //           items: selectVehicleList.map((location) {
+                    //             return DropdownMenuItem(
+                    //               value: location,
+                    //               child:  Text(location),
+                    //             );
+                    //           }).toList(),
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // const SizedBox(
+                    //   height: 5,
+                    // ),
+                    // TextFormField(
+                    //   controller: registrationNoController,
+                    //   decoration: InputDecoration(
+                    //     prefixIcon: const Icon(
+                    //       Icons.car_crash_outlined,
+                    //       color: AppColors.tabtextColor,
+                    //     ),
+                    //     hintText: 'Registration No',
+                    //     hintStyle: const TextStyle(fontSize: 13),
+                    //     contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                    //     focusedErrorBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     enabledBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     errorBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     focusedBorder: OutlineInputBorder(
+                    //       borderSide: const BorderSide(color: AppColors.whiteTemp),
+                    //       borderRadius: BorderRadius.circular(25),
+                    //     ),
+                    //   ),
+                    //   validator: (value) {
+                    //     if (value!.isEmpty) {
+                    //       return 'Please Enter Registration No';
+                    //     }
+                    //     return null; // Return null if the input is valid
+                    //   },
+                    // ),
+                    // const SizedBox(
+                    //   height: 5,
+                    // ),
+                    // TextFormField(
+                    //   onTap: () {
+                    //     showPlacePicker();
+                    //   },
+                    //   readOnly: true,
+                    //   controller: addressController,
+                    //   decoration: InputDecoration(
+                    //     prefixIcon: const Icon(
+                    //       Icons.location_on,
+                    //       color: AppColors.tabtextColor,
+                    //     ),
+                    //     hintText: 'Address',
+                    //     hintStyle: const TextStyle(fontSize: 13),
+                    //     contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                    //     focusedErrorBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     enabledBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     errorBorder: OutlineInputBorder(
+                    //         borderRadius: BorderRadius.circular(25),
+                    //         borderSide: const BorderSide(
+                    //             color: AppColors.whiteTemp, width: 2)),
+                    //     focusedBorder: OutlineInputBorder(
+                    //       borderSide: const BorderSide(color: AppColors.whiteTemp),
+                    //       borderRadius: BorderRadius.circular(25),
+                    //     ),
+                    //   ),
+                    //   validator: (value) {
+                    //     if (value!.isEmpty) {
+                    //       return 'Please Enter Address';
+                    //     }
+                    //     return null; // Return null if the input is valid
+                    //   },
+                    // ),
+                    // const SizedBox(
+                    //   height: 8,
+                    // ),
                     TextFormField(
                       obscureText: _obscureText,
                       controller: passwordC,
@@ -419,7 +458,7 @@ class _SignUpScrState extends State<SignUpScr> {
                       ),
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Please Enter Password';
+                          return 'Please Enter Confirm Password';
                         } else if (value.toString() !=
                             passwordC.text.toString()) {
                           return 'Confirm Password is Not Match';
@@ -481,7 +520,8 @@ class _SignUpScrState extends State<SignUpScr> {
     );
   }
 
-  TextEditingController ownernameController = TextEditingController();
+  TextEditingController firstNmaeController = TextEditingController();
+  TextEditingController lastNmaecontroller = TextEditingController();
   TextEditingController registrationNoController = TextEditingController();
   TextEditingController addressController = TextEditingController();
 
@@ -490,19 +530,19 @@ class _SignUpScrState extends State<SignUpScr> {
       isLoading = true;
     });
     var param = {
-      'user_fullname': ownernameController.text,
-      'user_email': emailC.text,
-      'user_phone': mobilecontroller.text,
-      'gender': _selectvehiclecat.toString(),
-      'address': addressController.text,
-      'password': passwordC.text,
-      'rc_number': registrationNoController.text,
+      'email': '${emailC.text.toString()}',
+      'password': '${passwordC.text.toString()}',
+      'first_name':firstNmaeController.text.toString(),
+      'last_name': lastNmaecontroller.text.toString(),
+      'term': '1',
+      'phone': mobilecontroller.text.toString()
     };
-    apiBaseHelper.postAPICall(loginApi, param).then((getData) {
-      bool error = getData['status'];
-      String msg = getData['message'];
+    apiBaseHelper.postAPICall(userRegister, param).then((getData) {
+      int error = getData['status'];
 
-      if (error == true) {
+      if (error == 1) {
+        String msg = getData['message'].toString();
+
         customSnackbar(context, msg.toString());
         Navigator.pushReplacement(
             context,
@@ -513,6 +553,8 @@ class _SignUpScrState extends State<SignUpScr> {
           isLoading = false;
         });
       } else {
+        String msg = getData['message']['email'][0].toString();
+
         customSnackbar(context, msg.toString());
         setState(() {
           isLoading = false;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hellostay/constants/colors.dart';
+import 'package:hellostay/repository/apiBasehelper.dart';
 import 'package:hellostay/repository/apiConstants.dart';
 import 'package:hellostay/repository/apiStrings.dart';
 import 'package:hellostay/screens/signUp.dart';
@@ -11,6 +13,7 @@ import 'package:hellostay/widgets/custumScreen.dart';
 import 'package:hellostay/widgets/loadingwidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'bottom_nav/bottom_Nav_bar.dart';
 import 'forgetPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -280,16 +283,16 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                         if (_formKey.currentState!.validate()) {
                           if (num == 1) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VerifyOtp(
-                                    isLogin: true,
-                                    mobile: mobilecontroller.text,
-                                    otp: '123456',
-                                  ),
-                                ));
-                            //loginmobileApi();
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (context) => VerifyOtp(
+                            //         isLogin: true,
+                            //         mobile: mobilecontroller.text,
+                            //         otp: '123456',
+                            //       ),
+                            //     ));
+                            loginmobileApi();
                           } else {
                             loginemailApi();
                           }
@@ -360,17 +363,17 @@ var fcmToken;
     var param = {
       'email': emailC.text.toString(),
       'password': passwordC.text.toString(),
-      'firebaseToken':"${fcmToken.toString()}",
+      'device_name': '12345678'
     };
 
     apiBaseHelper.postAPICall(loginApi, param).then((getData) async {
-      bool error = getData['status'];
+      int error = getData['status'];
       String msg = getData['message'].toString();
-
       print("email");
-      if (error == true) {
+      if (error ==1 ) {
+
         final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', '${getData['data']['id']}');
+        await prefs.setString('userToken', '${getData['access_token']}');
 
         /*customSnackbar(context, msg.toString());
         Navigator.pushReplacement(
@@ -378,11 +381,17 @@ var fcmToken;
             MaterialPageRoute(
               builder: (context) => Dashboard(),
             ));*/
+        Fluttertoast.showToast(msg: "Login Successful");
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BottomNavBar(),
+            ));
         setState(() {
           isLoading = false;
         });
       } else {
-        customSnackbar(context, msg.toString());
+        Fluttertoast.showToast(msg: "Login Not Successful");
         setState(() {
           isLoading = false;
         });
@@ -403,16 +412,17 @@ var fcmToken;
     });
 
     var param = {
-      'user_phone': mobilecontroller.text.toString(),
+      'mobile': mobilecontroller.text.toString(),
     };
 
-    apiBaseHelper.postAPICall(loginApi, param).then((getData) async {
-      bool error = getData['status'];
+    apiBaseHelper.postAPICall(getSendOtp, param).then((getData) async {
+      print("===my technic=======${getData}===============");
+      int error = getData['status'];
       String msg = getData['message'].toString();
 
       print("mobile");
-      if (error == true) {
-        var otp = getData['data'].toString();
+      if (error == 1) {
+        // var otp = getData['data'].toString();
         customSnackbar(context, msg.toString());
         Navigator.push(
             context,
@@ -420,7 +430,7 @@ var fcmToken;
               builder: (context) => VerifyOtp(
                 isLogin: true,
                 mobile: mobilecontroller.text,
-                otp: otp.toString(),
+                // otp: otp.toString(),
               ),
             ));
         setState(() {
@@ -457,4 +467,6 @@ var fcmToken;
   final emailC = TextEditingController();
   final passwordC = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+
 }

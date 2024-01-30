@@ -112,5 +112,5 @@ class InvalidInputException extends CustomException {
   InvalidInputException([message]) : super(message, 'Invalid Input: ');
 }
 Map<String, String> get headers => {
-  'Cookie': 'ci_session=3a2ad9ed3b163b1b2873213952605317b83816b3',
+  'Authorization': 'Bearer 16|EaO3TFLM9tCVTxFQu6bD52GMHvqcr6JSacn97yGH10b4dc3a'
 };

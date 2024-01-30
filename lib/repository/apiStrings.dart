@@ -4,9 +4,11 @@
 
 import 'apiConstants.dart';
 
-final Uri getSendOtp = Uri.parse('${baseUrl}sendotp');
+final Uri userRegister = Uri.parse('${baseUrl}register');
+final Uri getSendOtp = Uri.parse('${baseUrl}send-otp');
 final Uri loginApi = Uri.parse('${baseUrl}login');
-final Uri getVerifyOtp = Uri.parse('${baseUrl}verifyotp');
+final Uri getVerifyOtp = Uri.parse('${baseUrl}verify-otp');
+final Uri getUserDataApi = Uri.parse('${baseUrl}me');
 final Uri getSignUpApi = Uri.parse('${baseUrl}signup/completesignup');
 final Uri getSignSendOtp = Uri.parse('${baseUrl}signup/sendotp');
 final Uri getSignVerifyOtp = Uri.parse('${baseUrl}signup/verifyotp');

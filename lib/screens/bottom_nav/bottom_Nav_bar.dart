@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hellostay/repository/apiBasehelper.dart';
 import 'package:hellostay/screens/Hotel/homeView.dart';
 import 'package:hellostay/utils/sharedPreference.dart';
 import 'package:hellostay/widgets/custom_nav_bar.dart';
+
+import '../../constants/colors.dart';
+import '../userProfile/userprofile.dart';
 
 
 class BottomNavBar extends StatefulWidget {
@@ -19,26 +23,26 @@ class _BottomNavBarState extends State<BottomNavBar> {
       case 0:
         return  HotelHomePage();
         break;
-      case 1:
-       // Common.checkLogin(context);
-        return const Center(child: Text('Message'),);
-        break;
+      // case 1:
+      //  // Common.checkLogin(context);
+      //   return const Center(child: Text('Message'),);
+      //   break;
 
-      case 2:
+      case 1:
        // Common.checkLogin(context);
         return const Center(child: Text('Trip Screen'),);
         break;
 
-      case 3:
+      case 2:
        // Common.checkLogin(context);
         return const Center(child: Text('Booking'),);/*const BookingScreen(
             *//*idUser: widget.userID,*//*
             )*/;
         break;
 
-      case 4:
+      case 3:
        // Common.checkLogin(context);
-        return Center(child: Text('Profile'),);/*const ProfileScreen(
+        return MyprofileScr();/*const ProfileScreen(
             *//*userID: widget.userID,*//*
             );*/
         break;
@@ -72,54 +76,88 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: callPage(currentIndex),
-        bottomNavigationBar: BottomNavigationDotBar(
-            color: Colors.black26,
+    return
 
-            items: <BottomNavigationDotBarItem>[
-              BottomNavigationDotBarItem(
-                  icon: const IconData(0xe900, fontFamily: 'home'),
-                  onTap: () {
-                    setState(() {
-                      currentIndex = 0;
-                    });
-                  }),
-              BottomNavigationDotBarItem(
-                  icon: const IconData(0xe900, fontFamily: 'message'),
-                  onTap: () {
-                    setState(() {
-                      currentIndex = 1;
-                    });
-                  }),
-              BottomNavigationDotBarItem(
-                  icon: const IconData(
-                    0xe900,
-                    fontFamily: 'trip',
-                  ),
-                  onTap: () {
-                    setState(() {
-                      currentIndex = 2;
-                    });
-                  }),
-              BottomNavigationDotBarItem(
-                  icon: const IconData(
-                    0xe900,
-                    fontFamily: 'hearth',
-                  ),
-                  onTap: () {
-                    setState(() {
-                      currentIndex = 3;
-                    });
-                  }),
-              BottomNavigationDotBarItem(
-                  icon: const IconData(0xe900, fontFamily: 'profile'),
-                  onTap: () {
-                    setState(() {
-                      currentIndex = 4;
-                    });
-                  }),
-            ]));
+
+
+      WillPopScope(
+        onWillPop: () async {
+          showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Confirm Exit"),
+                  content: Text("Are you sure you want to exit?"),
+                  actions: <Widget>[
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(primary: AppColors.primary),
+                      child: Text("YES"),
+                      onPressed: () {
+                        SystemNavigator.pop();
+                      },
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(primary: AppColors.primary),
+                      child: Text("NO"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                );
+              });
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: callPage(currentIndex),
+          bottomNavigationBar: BottomNavigationDotBar(
+              color: Colors.black26,
+
+              items: <BottomNavigationDotBarItem>[
+                BottomNavigationDotBarItem(
+                    icon: const IconData(0xe900, fontFamily: 'home'),
+                    onTap: () {
+                      setState(() {
+                        currentIndex = 0;
+                      });
+                    }),
+                // BottomNavigationDotBarItem(
+                //     icon: const IconData(0xe900, fontFamily: 'message'),
+                //     onTap: () {
+                //       setState(() {
+                //         currentIndex = 1;
+                //       });
+                //     }),
+                BottomNavigationDotBarItem(
+                    icon: const IconData(
+                      0xe900,
+                      fontFamily: 'trip',
+                    ),
+                    onTap: () {
+                      setState(() {
+                        currentIndex = 1;
+                      });
+                    }),
+                BottomNavigationDotBarItem(
+                    icon: const IconData(
+                      0xe900,
+                      fontFamily: 'hearth',
+                    ),
+                    onTap: () {
+                      setState(() {
+                        currentIndex = 2;
+                      });
+                    }),
+                BottomNavigationDotBarItem(
+                    icon: const IconData(0xe900, fontFamily: 'profile'),
+                    onTap: () {
+                      setState(() {
+                        currentIndex = 3;
+                      });
+                    }),
+              ])),
+      );
   }
 }

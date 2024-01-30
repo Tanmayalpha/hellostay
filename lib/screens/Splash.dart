@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hellostay/constants/colors.dart';
 import 'package:hellostay/screens/bottom_nav/bottom_Nav_bar.dart';
 import 'package:hellostay/utils/sharedPreference.dart';
@@ -69,6 +70,9 @@ class _SplashScreenState extends State<SplashScreen> {
     // });
 
     // Timer(Duration(seconds: 3), () {Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> IntroSlider()));});
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     super.initState();
     checkLogin();
   }

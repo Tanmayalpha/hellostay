@@ -9,6 +9,8 @@ import 'package:hellostay/widgets/loadingwidget.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'bottom_nav/bottom_Nav_bar.dart';
+
 
 
 class VerifyOtp extends StatefulWidget {
@@ -59,11 +61,11 @@ class _VerifyOtpState extends State<VerifyOtp> {
                           fontSize: 20,
                           color: AppColors.blackTemp,
                           fontWeight: FontWeight.w400)),
-                  Text('OTP: ${otp.toString()}',
-                      style: const TextStyle(
-                          fontSize: 20,
-                          color: AppColors.blackTemp,
-                          fontWeight: FontWeight.w400)),
+                  // Text('OTP: ${otp.toString()}',
+                  //     style: const TextStyle(
+                  //         fontSize: 20,
+                  //         color: AppColors.blackTemp,
+                  //         fontWeight: FontWeight.w400)),
                   const SizedBox(
                     height: 30,
                   ),
@@ -118,32 +120,32 @@ class _VerifyOtpState extends State<VerifyOtp> {
                   ),
                   InkWell(
                       onTap: () {
-
-                        if (textotp == null) {
-                          customSnackbar(context, "Please Fill OTP Fields");
-                        } else if (otp != textotp) {
-                          customSnackbar(context, "Please Fill Correct OTP");
-                        } else {
-                          if(widget.isLogin==true){
-                            verifie();
-
-                          }
-                          else{
-
-
-                            /*Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChangePassword(
-                                      Mobile: widget.Mobile.toString()),
-                                ));*/
-
-
-                          }
-
-
-
-                        }
+                        verifie();
+                        // if (textotp == null) {
+                        //   customSnackbar(context, "Please Fill OTP Fields");
+                        // } else if (otp != textotp) {
+                        //   customSnackbar(context, "Please Fill Correct OTP");
+                        // } else {
+                        //   if(widget.isLogin==true){
+                        //     verifie();
+                        //
+                        //   }
+                        //   else{
+                        //
+                        //
+                        //     /*Navigator.push(
+                        //         context,
+                        //         MaterialPageRoute(
+                        //           builder: (context) => ChangePassword(
+                        //               Mobile: widget.Mobile.toString()),
+                        //         ));*/
+                        //
+                        //
+                        //   }
+                        //
+                        //
+                        //
+                        // }
                       },
                       child: CustomButton(
                         textt: "Submit",
@@ -177,15 +179,15 @@ class _VerifyOtpState extends State<VerifyOtp> {
       isLoading = true;
     });
     var param = {
-      "user_phone": widget.mobile.toString(),
+      "mobile": widget.mobile.toString(),
     };
-    apiBaseHelper.postAPICall(loginApi, param).then((getData) {
-      String msg = getData['message'];
-      bool error = getData['status'];
+    apiBaseHelper.postAPICall(getSendOtp, param).then((getData) {
+      String msg = getData['message'].toString();
+      int error = getData['status'];
 
-      if (error == true) {
+      if (error == 1) {
         setState(() {
-          otp = getData['data'].toString();
+          // otp = getData['data'].toString();
         });
         customSnackbar(context, msg.toString());
         setState(() {
@@ -214,27 +216,27 @@ class _VerifyOtpState extends State<VerifyOtp> {
       isLoading = true;
     });
     var param = {
-      "user_phone": widget.mobile.toString(),
-      'otp':otp.toString(),
-      'firebaseToken':fcmToken.toString()
+      'mobile': widget.mobile.toString(),
+      'otp': textotp.toString(),
+      'device_name': '12345678'
     };
-    apiBaseHelper.postAPICall(loginApi, param).then((getData) async {
-      String msg = getData['message'];
-      bool error = getData['status'];
+    apiBaseHelper.postAPICall(getVerifyOtp, param).then((getData) async {
+      // String msg = getData['message'];
+      int error = getData['status'];
 
-      if (error == true) {
+      if (error == 1) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', '${getData['data']['id']}');
+        await prefs.setString('userToken', '${getData['access_token']}');
         if(mounted){
-        customSnackbar(context, msg.toString()); }
+        customSnackbar(context, "Verify Successful"); }
 
-       /* Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Dashboard(),));*/
+       Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => BottomNavBar(),));
         setState(() {
           isLoading = false;
         });
       } else {
-        customSnackbar(context, msg.toString());
+        customSnackbar(context, "Verify Not Successful");
 
         setState(() {
           isLoading = false;
