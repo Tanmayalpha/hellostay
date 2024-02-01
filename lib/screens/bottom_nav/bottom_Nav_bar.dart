@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hellostay/repository/apiBasehelper.dart';
+import 'package:hellostay/repository/apiConstants.dart';
 import 'package:hellostay/screens/Hotel/homeView.dart';
 import 'package:hellostay/utils/sharedPreference.dart';
 import 'package:hellostay/widgets/custom_nav_bar.dart';
@@ -55,14 +56,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getProfile();
+    //getProfile();
   }
 
   ApiBaseHelper apiBaseHelper = ApiBaseHelper();
   getProfile() async {
     await App.init();
     Map response =
-        await apiBaseHelper.getAPICall(Uri.parse("${'baseUrl'}auth/me"));
+        await apiBaseHelper.getAPICall(Uri.parse("${baseUrl}me"));
 
     if (response['data'] != null) {
      // name = response['data']['name'] ?? "";

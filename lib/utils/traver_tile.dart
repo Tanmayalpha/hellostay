@@ -3,61 +3,79 @@ import 'package:flutter/material.dart';
 import 'package:hellostay/constants/colors.dart';
 
 class TravelDetailsTile extends StatefulWidget {
+
+   TravelDetailsTile({super.key,this.isFromHome});
+
+  bool? isFromHome ;
+
   @override
-  _TravelDetailsTileState createState() => _TravelDetailsTileState();
+  State<TravelDetailsTile> createState() => _TravelDetailsTileState();
 }
+
+List<int> adultCountList = [];
+List<int> childrenCountList = [];
+int adultCount1 = 1;
+int childrenCount1 = 0;
+int room = 1;
+
 
 class _TravelDetailsTileState extends State<TravelDetailsTile> {
   int adultCount = 1;
+
   int childrenCount = 0;
   List<List<int>> childrenAgesList = [];
 
   List<int?> childrenAgesSelected = [];
   List<List<int?>> childrenAgesSelectedList = [];
-  List<int> adultCountList = [];
-  List<int> childrenCountList = [];
+
   List<List<int?>> childrenCountListOfList = [];
 
   int? childrenAge;
 
-  int room = 1;
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    adultCountList.add(adultCount);
-    childrenCountList.add(childrenCount);
-    childrenCountListOfList.add(childrenAgesSelected);
+    if(widget.isFromHome ?? false) {
+      adultCountList.add(adultCount);
+      childrenCountList.add(childrenCount);
+     // childrenCountListOfList.add(childrenAgesSelected);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
       title:
-          Text('${adultCount + childrenCount} Travelers, $childrenCount Room'),
+          Text('${adultCount1 + childrenCount1} Travelers, $room Room'),
       children: [
         Wrap(
             children: List<Widget>.generate(room, (index) {
           return addRoom(index);
         })),
+        const SizedBox(
+          height: 50,
+        ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const SizedBox(
-              width: 50,
-            ),
+
             InkWell(
                 onTap: () {
                   room++;
+                  adultCount1++;
                   adultCountList.add(adultCount);
                   childrenCountList.add(childrenCount);
-                  childrenCountListOfList.add(childrenAgesSelected);
+                 // childrenCountListOfList.add(childrenAgesSelected);
                   setState(() {});
                 },
                 child: Container(
                   height: 40,
-                  width: 60,
+                  width: 100,
                   decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.primary)),
                   child: const Center(
                     child: Text(
@@ -67,21 +85,24 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
                   ),
                 )),
             const SizedBox(
-              width: 100,
+              width: 50,
             ),
             InkWell(
                 onTap: () {
                   room--;
+                  adultCount1--;
                   adultCountList.removeLast();
                   childrenCountList.removeLast();
-                  childrenCountListOfList.removeLast();
+                 // childrenCountListOfList.removeLast();
                   setState(() {});
                 },
                 child: Container(
                   height: 40,
-                  width: 60,
+                  width: 100,
                   decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.primary)),
+
                   child: const Center(
                     child: Text(
                       'Remove',
@@ -90,7 +111,8 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
                   ),
                 ))
           ],
-        )
+        ),
+        const SizedBox(height: 10,)
       ],
     );
   }
@@ -155,7 +177,13 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
                     onPressed: () {
                       if (count > 0) {
                         onChanged(count - 1);
+                        if(label == 'Adults'){
+                          adultCount1--;
+                        }else {
+                          childrenCount1--;
+                        }
                         childrenAgesSelected.removeLast();
+
                         // _updateChildrenAgesList();
                       }
                     },
@@ -178,6 +206,11 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
                     childrenAgesSelected.add(childrenAge);
 
                     onChanged(count + 1);
+                    if(label == 'Adults'){
+                      adultCount1++;
+                    }else {
+                      childrenCount1++;
+                    }
                   },
                 ),
               ),
@@ -188,6 +221,7 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
     );
   }
 
+
   Widget addRoom(int index) {
     return Column(
       children: [
@@ -197,6 +231,7 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
             _buildIncrementDecrement('Adults', adultCountList[index], (value) {
               setState(() {
                 adultCountList[index] = value;
+
                 //adultCount = value;
               });
             }),
@@ -209,7 +244,7 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
             }),
           ],
         ),
-        if (childrenCountList[index] > 0)
+        /*if (childrenCountList[index] > 0)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -218,7 +253,7 @@ class _TravelDetailsTileState extends State<TravelDetailsTile> {
                   : Text('Age of Child'),
               _buildChildrenDropdowns(index),
             ],
-          ),
+          ),*/
       ],
     );
   }

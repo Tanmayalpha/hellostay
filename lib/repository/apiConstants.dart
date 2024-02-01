@@ -79,6 +79,7 @@ ApiBaseHelper apiBaseHelper = ApiBaseHelper();
 // for demo panels
 // const String baseUrl = 'https://healthgenie.in/wp-json/hgapp/v1/';
 const String baseUrl = 'https://hotelbooking.alphawizzserver.com/api/auth/';
+const String baseUrl1 = 'https://hotelbooking.alphawizzserver.com/api/';
 const String UpdateImageUrl = 'https://hotelbooking.alphawizzserver.com/api/';
 //const String ecomExpressUrl = 'https://clbeta.ecomexpress.in/track_me/api/mawbd/';
 const String jwtKey = 'https://alphawizzserver.com/';

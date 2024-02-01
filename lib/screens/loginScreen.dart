@@ -370,7 +370,7 @@ var fcmToken;
       int error = getData['status'];
       String msg = getData['message'].toString();
       print("email");
-      if (error ==1 ) {
+      if (error == 1 ) {
 
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('userToken', '${getData['access_token']}');

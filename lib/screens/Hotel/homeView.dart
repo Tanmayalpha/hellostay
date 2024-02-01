@@ -2,13 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hellostay/constants/colors.dart';
+import 'package:hellostay/screens/Hotel/hotel_list_View.dart';
+import 'package:hellostay/utils/address_search.dart';
 import 'package:hellostay/utils/date_function.dart';
+import 'package:hellostay/utils/place_service.dart';
 import 'package:hellostay/utils/traver_tile.dart';
+import 'package:hellostay/widgets/custom_app_button.dart';
+import 'package:hellostay/widgets/select_date_widget.dart';
 import 'package:intl/intl.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 import 'calender_view.dart';
 
@@ -37,6 +44,10 @@ final List rooms = [
 
 DateTime startDate = DateTime.now();
 DateTime endDate = DateTime.now().add(const Duration(days: 5));
+String formattedCheckInDate = '';
+String formattedCheckOutDate = '';
+String checkInDayOfWeek= '';
+String checkOutDayOfWeek= '';
 
 bool isDatePopupOpen = false;
 
@@ -55,8 +66,9 @@ final checkInC = TextEditingController();
 final checkOutC = TextEditingController();
 final searchC = TextEditingController();
 
-String? checkInDate  = '' ;
-String? checkOutDate  = '' ;
+String checkInDate  = '' ;
+String checkOutDate  = '' ;
+
 
 //CityListResponse? cityListResponse;
 dynamic cityListResponse;
@@ -65,8 +77,15 @@ class _HotelHomePageState extends State<HotelHomePage> {
   @override
   void initState() {
     // TODO: implement initState
-    getCityList();
+    //getCityList();
     super.initState();
+
+    checkInDate = DateTime.now().toString();
+    checkOutDate =  DateTime.now().add(const Duration(days: 1)).toString();
+    formattedCheckInDate = DateFormat("dd MMM''yy").format(DateTime.parse(checkInDate));
+    checkInDayOfWeek = DateFormat("EEEE").format(DateTime.parse(checkInDate));
+    formattedCheckOutDate = DateFormat("dd MMM''yy").format(DateTime.parse(checkOutDate));
+    checkOutDayOfWeek = DateFormat("EEEE").format(DateTime.parse(checkOutDate));
   }
 
  // Payload? cityId;
@@ -74,11 +93,39 @@ class _HotelHomePageState extends State<HotelHomePage> {
 
   /*static String _displayStringForOption(Payload option) =>
       option.name ?? '';*/
-  TextEditingController citySearchC =  TextEditingController();
+ // TextEditingController citySearchC =  TextEditingController();
+  final _controller = TextEditingController();
+  String _streetNumber = '';
+  String _street = '';
+  String _city = '';
+  String _zipCode = '';
+  int adultCount = 1;
+  int childrenCount = 0;
+  List<int> childrenAges = List.filled(0, 0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: InkWell(
+        onTap: (){
+
+          Navigator.push(context,
+                          MaterialPageRoute(
+                            builder: (context) => HotelSearchScreen(
+                              children: childrenCount,
+                              adults: adultCount,
+                              //title: cityId?.name ?? '',
+                              checkIn: DateFormat('yyyy-MM-dd').format(DateTime.parse(checkInDate)),
+                              checkOut: DateFormat('yyyy-MM-dd').format(DateTime.parse(checkOutDate)),
+                              address: _controller.text, lat: '', long: '',
+                            ),
+                          ));
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20,08,20,08),
+          child: CustomButton(textt: 'Book Now'),
+        ),
+      ),
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -230,6 +277,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
             padding: EdgeInsets.all(10.0),
             child: Text("Book on India's Largest Hotel Network", style: TextStyle(fontSize: 25),),
           ),),
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -245,7 +293,27 @@ class _HotelHomePageState extends State<HotelHomePage> {
               child: TextFormField(
                 readOnly: true,
                 controller: searchC,
-                onTap: () {
+                onTap: () async{
+                  final sessionToken = const Uuid().v4();
+                  final Suggestion? result = await showSearch(
+                    context: context,
+                    delegate: AddressSearch(sessionToken),
+                  );
+                  if (result != null) {
+
+                    final placeDetails = await PlaceApiProvider(sessionToken)
+                        .getPlaceDetailFromId(result.placeId);
+
+
+                    searchC.text = result.description;
+                    _streetNumber = placeDetails.streetNumber ?? '';
+                    _street = placeDetails.street ??'';
+                    _city = placeDetails.city?? '';
+                    _zipCode = placeDetails.zipCode??'';
+                    setState(() {
+                      _controller.text = result.description;
+                    });
+                  }
                   /* var result = ShowListForm();
                               if (result != "" ||
                                   result != null) {
@@ -273,9 +341,14 @@ class _HotelHomePageState extends State<HotelHomePage> {
               height: 15.0,
             ),
           ),
+          SliverToBoxAdapter(child: TravelDetailsTile(isFromHome: true),),
+          const SliverToBoxAdapter(child: Padding(
+            padding: EdgeInsets.only(left: 8.0,right: 8.0),
+            child: Divider(),
+          )),
           SliverToBoxAdapter(
             child: Padding(
-              padding:  EdgeInsets.all(10),
+              padding:  const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment:
                 MainAxisAlignment.spaceBetween,
@@ -285,6 +358,8 @@ class _HotelHomePageState extends State<HotelHomePage> {
                     onTap: () async{
                       String date = await selectDate(context);
 
+                      checkInDate = date ;
+
                       formattedCheckInDate = DateFormat("dd MMM''yy").format(DateTime.parse(date));
                       checkInDayOfWeek = DateFormat("EEEE").format(DateTime.parse(date));
                       setState(() {
@@ -292,10 +367,13 @@ class _HotelHomePageState extends State<HotelHomePage> {
                         isCheckOutSelected = false ;
                       });
                     },
-                      child: selectDateWidget( 'Check-in', checkInDayOfWeek, formattedCheckInDate,isCheckInSelected)),
+                      child: selectDateWidget( 'Check-in', checkInDayOfWeek, formattedCheckInDate,isCheckInSelected, context)),
+                  const Icon(Icons.nights_stay, color: AppColors.faqanswerColor,),
                   InkWell(
                     onTap: () async{
                       String date = await selectDate(context);
+                      checkOutDate = date ;
+
 
                       formattedCheckOutDate = DateFormat("dd MMM''yy").format(DateTime.parse(date));
                       checkOutDayOfWeek = DateFormat("EEEE").format(DateTime.parse(date));
@@ -304,7 +382,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                         isCheckOutSelected = true ;
                       });
                     },
-                      child: selectDateWidget( 'Check-Out',checkOutDayOfWeek, formattedCheckOutDate,isCheckOutSelected)),
+                      child: selectDateWidget( 'Check-Out',checkOutDayOfWeek, formattedCheckOutDate,isCheckOutSelected, context)),
                   /*Column(
                     crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -363,14 +441,31 @@ class _HotelHomePageState extends State<HotelHomePage> {
               ),
             ),
           ),
-       SliverToBoxAdapter(child: TravelDetailsTile(),),
 
-          SliverList(
+
+          SliverToBoxAdapter(child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+              child: Row(children: List<Widget>.generate(100, (index) =>_buildRooms(context,index) ))),),
+
+          SliverToBoxAdapter(child: StaggeredGridView.countBuilder(
+              crossAxisCount: 2,
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 5,
+              itemCount: 10,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) => _buildRooms2(context,index),
+              staggeredTileBuilder: (index) {
+          return  StaggeredTile.count(1, index.isEven ? 1.5 : 2);
+          })
+                ),
+
+          /*SliverList(
             delegate:
             SliverChildBuilderDelegate((BuildContext context, int index) {
               return _buildRooms(context, index);
-            }, childCount: 100),
-          )
+            }, childCount: 100,),
+          )*/
         ],
       ),
     );
@@ -379,7 +474,6 @@ class _HotelHomePageState extends State<HotelHomePage> {
  // CitySearchModel? citySearchModel;
   dynamic citySearchModel;
   searchApi(String value) async {
-    print('_____aaaa_____${value}_________');
     var headers = {
       'apikey': 'apiKey'
     };
@@ -428,229 +522,219 @@ class _HotelHomePageState extends State<HotelHomePage> {
   Widget _buildRooms(BuildContext context, int index) {
     var room = rooms[index % rooms.length];
     return Container(
+      //height: 320,
+      width: 300,
       margin: const EdgeInsets.all(20.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5.0),
-        child: Container(
-          child: Material(
-            elevation: 5.0,
-            borderRadius: BorderRadius.circular(5.0),
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Stack(
+        child: Material(
+          elevation: 5.0,
+          borderRadius: BorderRadius.circular(5.0),
+          color: Colors.white,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  Image.network(room['image'],height: 200, ),
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Icon(
+                      Icons.star,
+                      color: Colors.grey.shade800,
+                      size: 20.0,
+                    ),
+                  ),
+                  const Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Icon(
+                      Icons.star_border,
+                      color: Colors.white,
+                      size: 24.0,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20.0,
+                    right: 10.0,
+                    child: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      color: Colors.white,
+                      child: const Text("\$40"),
+                    ),
+                  )
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Image.network(room['image']),
-                    Positioned(
-                      right: 10,
-                      top: 10,
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.grey.shade800,
-                        size: 20.0,
-                      ),
+                    Text(
+                      room['title'],
+                      style: const TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Icon(
-                        Icons.star_border,
-                        color: Colors.white,
-                        size: 24.0,
-                      ),
+                    const SizedBox(
+                      height: 5.0,
                     ),
-                    Positioned(
-                      bottom: 20.0,
-                      right: 10.0,
-                      child: Container(
-                        padding: EdgeInsets.all(10.0),
-                        color: Colors.white,
-                        child: Text("\$40"),
-                      ),
+                    const Text("Bouddha, Kathmandu"),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                        ),
+                        Icon(
+                          Icons.star,
+                          color: Colors.green,
+                        ),
+                        SizedBox(
+                          width: 5.0,
+                        ),
+                        Text(
+                          "(220 reviews)",
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      ],
                     )
                   ],
                 ),
-                Container(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        room['title'],
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 5.0,
-                      ),
-                      Text("Bouddha, Kathmandu"),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            Icons.star,
-                            color: Colors.green,
-                          ),
-                          Icon(
-                            Icons.star,
-                            color: Colors.green,
-                          ),
-                          Icon(
-                            Icons.star,
-                            color: Colors.green,
-                          ),
-                          Icon(
-                            Icons.star,
-                            color: Colors.green,
-                          ),
-                          Icon(
-                            Icons.star,
-                            color: Colors.green,
-                          ),
-                          SizedBox(
-                            width: 5.0,
-                          ),
-                          Text(
-                            "(220 reviews)",
-                            style: TextStyle(color: Colors.grey),
-                          )
-                        ],
-                      )
-                    ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRooms2(BuildContext context, int index) {
+    var room = rooms[index % rooms.length];
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(5.0),
+      child: Material(
+        elevation: 5.0,
+        borderRadius: BorderRadius.circular(5.0),
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Stack(
+              children: <Widget>[
+                Image.network(room['image'] ),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Icon(
+                    Icons.star,
+                    color: Colors.grey.shade800,
+                    size: 20.0,
                   ),
                 ),
+                const Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Icon(
+                    Icons.star_border,
+                    color: Colors.white,
+                    size: 24.0,
+                  ),
+                ),
+                Positioned(
+                  bottom: 20.0,
+                  right: 10.0,
+                  child: Container(
+                    padding: const EdgeInsets.all(10.0),
+                    color: Colors.white,
+                    child: const Text("\$40"),
+                  ),
+                )
               ],
             ),
-          ),
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    room['title'],
+                    style: const TextStyle(
+                        fontSize: 18.0, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 5.0,
+                  ),
+                  const Text("Bouddha, Kathmandu"),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.star,
+                        color: Colors.green,
+                      ),
+                      Icon(
+                        Icons.star,
+                        color: Colors.green,
+                      ),
+                      Icon(
+                        Icons.star,
+                        color: Colors.green,
+                      ),
+                      Icon(
+                        Icons.star,
+                        color: Colors.green,
+                      ),
+                      Icon(
+                        Icons.star,
+                        color: Colors.green,
+                      ),
+                      SizedBox(
+                        width: 5.0,
+                      ),
+                      Text(
+                        "(220 reviews)",
+                        style: TextStyle(color: Colors.grey),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  int adultCount = 1;
-  int childrenCount = 0;
-  List<int> childrenAges = List.filled(0, 0);
 
 
-  Widget travelerTile(){
-    return ExpansionTile(
-      title: Text('Traveler Count: $adultCount Adult(s), $childrenCount Children(s)'),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildIncrementDecrement('Adults', adultCount, (value) {
-              setState(() {
-                adultCount = value;
-              });
-            }),
-            _buildIncrementDecrement('Children', childrenCount, (value) {
-              setState(() {
-                childrenCount = value;
-                childrenAges = List.filled(value, 0);
-              });
-            }),
-          ],
-        ),
-        if (childrenCount > 0) ..._buildChildrenDropdowns(),
-      ],
-    );
-  }
 
-  List<Widget> _buildChildrenDropdowns() {
-    List<Widget> dropdowns = [];
-    for (int i = 0; i < childrenCount; i++) {
-      dropdowns.add(
-        Row(
-          children: [
-            Text('Child ${i + 1} Age:'),
-            SizedBox(width: 10),
-            DropdownButton<int>(
-              value: childrenAges[i],
-              onChanged: (value) {
-                setState(() {
-                  childrenAges[i] = value!;
-                });
-              },
-              items: List.generate(18, (index) => index + 1)
-                  .map((age) => DropdownMenuItem<int>(
-                value: age,
-                child: Text('$age'),
-              ))
-                  .toList(),
-            ),
-          ],
-        ),
-      );
-    }
-    return dropdowns;
-  }
 
-  Widget _buildIncrementDecrement(String label, int count, Function(int) onChanged) {
-    return Column(
-      children: [
-        Text(label),
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.remove),
-              onPressed: () {
-                if (count > 0) {
-                  onChanged(count - 1);
-                }
-              },
-            ),
-            Text('$count'),
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                onChanged(count + 1);
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
-  Widget _buildCategories() {
-    return Container(
-      height: 100,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(
-            width: 15.0,
-          ),
-          Category(
-            backgroundColor: Colors.pink,
-            icon: Icons.hotel,
-            title: "Hotel",
-          ),
-          SizedBox(
-            width: 15.0,
-          ),
-          Category(
-            backgroundColor: Colors.blue,
-            title: "Restaurant",
-            icon: Icons.restaurant,
-          ),
-          SizedBox(
-            width: 15.0,
-          ),
-          Category(
-            icon: Icons.local_cafe,
-            backgroundColor: Colors.orange,
-            title: "Cafe",
-          )
-        ],
-      ),
-    );
-  }
+
+
 
 
 
@@ -698,7 +782,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                           ),
                           Text(
                             '${DateFormat("dd, MMM").format(startDate)} - ${DateFormat("dd, MMM").format(endDate)}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w100,
                               fontSize: 16,
                             ),
@@ -762,7 +846,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                           ),
                           Text(
                             '${peopleCount} Adults - ${childCount} Child',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w100,
                               fontSize: 16,
                             ),
@@ -804,7 +888,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Adults'),
+                    const Text('Adults'),
                     Row(
                       children: [
                         InkWell(
@@ -814,7 +898,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                               });
                             },
                             child: const Icon(Icons.add_circle_outline)),
-                        SizedBox(
+                        const SizedBox(
                           width: 10,
                         ),
                         Text('${peopleCount}'),
@@ -829,7 +913,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                                 }
                               });
                             },
-                            child: Icon(Icons.remove_circle_outline)),
+                            child: const Icon(Icons.remove_circle_outline)),
                       ],
                     )
                   ],
@@ -840,7 +924,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Child'),
+                    const Text('Child'),
                     Row(
                       children: [
                         InkWell(
@@ -849,12 +933,12 @@ class _HotelHomePageState extends State<HotelHomePage> {
                                 childCount++;
                               });
                             },
-                            child: Icon(Icons.add_circle_outline)),
-                        SizedBox(
+                            child: const Icon(Icons.add_circle_outline)),
+                        const SizedBox(
                           width: 10,
                         ),
                         Text('${childCount}'),
-                        SizedBox(
+                        const SizedBox(
                           width: 10,
                         ),
                         InkWell(
@@ -865,7 +949,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                                 }
                               });
                             },
-                            child: Icon(Icons.remove_circle_outline)),
+                            child: const Icon(Icons.remove_circle_outline)),
                       ],
                     )
                   ],
@@ -893,11 +977,11 @@ class _HotelHomePageState extends State<HotelHomePage> {
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        minimumSize: Size(double.maxFinite, 40),
+                        minimumSize: const Size(double.maxFinite, 40),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20))),
-                    child: Text('Apply')),
-                SizedBox(
+                    child: const Text('Apply')),
+                const SizedBox(
                   height: 10,
                 ),
               ],
@@ -928,56 +1012,12 @@ class _HotelHomePageState extends State<HotelHomePage> {
     );
   }
 
-  String formattedCheckInDate = '';
-  String formattedCheckOutDate = '';
+
   String dayOfWeek= '';
-  String checkInDayOfWeek= '';
-  String checkOutDayOfWeek= '';
+
   bool isCheckInSelected = false ;
   bool isCheckOutSelected = false ;
 
-  Widget selectDateWidget (String title, String checkInDayOfWeek, String formattedCheckInDate, bool isSelected){
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isSelected ? AppColors.primary : Colors.black54.withOpacity(0.5),
-          ),
-        ),
-        const SizedBox(height: 8),
-        checkInDayOfWeek == ''  ? const Text('Select Date') : RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: '$formattedCheckInDate\n',
-                style: const TextStyle(
-                  fontSize: 20,
-                  color:  AppColors.blackTemp,
-                ),
-              ),
-              TextSpan(
-                text: checkInDayOfWeek,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color:  Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 2,
-          width: MediaQuery.of(context).size.width/2.5,
-          color: isSelected ?  AppColors.primary : Colors.grey,
-        ),
-      ],
-    );
-  }
 
 /* Widget getTimeDateUI() {
     return Padding(
@@ -1114,9 +1154,9 @@ class Category extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.all(Radius.circular(5.0))),
-        margin: EdgeInsets.symmetric(vertical: 10.0),
-        padding: EdgeInsets.all(10.0),
+            borderRadius: const BorderRadius.all(Radius.circular(5.0))),
+        margin: const EdgeInsets.symmetric(vertical: 10.0),
+        padding: const EdgeInsets.all(10.0),
         width: 100,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1125,13 +1165,14 @@ class Category extends StatelessWidget {
               icon,
               color: Colors.white,
             ),
-            SizedBox(
+            const SizedBox(
               height: 5.0,
             ),
-            Text(title, style: TextStyle(color: Colors.white))
+            Text(title, style: const TextStyle(color: Colors.white))
           ],
         ),
       ),
     );
   }
 }
+

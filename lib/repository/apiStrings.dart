@@ -20,5 +20,6 @@ final Uri getAddProductApi = Uri.parse('${baseUrl}product_purchase');
 final Uri getSupplierOrClientApi = Uri.parse('${baseUrl}supplier');
 final Uri contactSupplierOrClientApi = Uri.parse('${baseUrl}save_inquiry');
 final Uri getProductsApi = Uri.parse('${baseUrl}get_home_products');
+final Uri hotelSearch = Uri.parse('${baseUrl1}hotel/search');
 
 const String MethodType = 'GET';
