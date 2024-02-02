@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hellostay/constants/colors.dart';
 import 'package:hellostay/model/hotel_search_response.dart';
 import 'package:hellostay/repository/apiConstants.dart';
+import 'package:hellostay/screens/Hotel/hotel_details_View.dart';
 import 'package:hellostay/utils/date_function.dart';
 import 'package:hellostay/utils/draggable_sheet.dart';
 import 'package:hellostay/utils/traver_tile.dart';
@@ -104,7 +105,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
     return Scaffold(
       appBar: _appBar,
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -170,23 +171,28 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
             const SizedBox(
               height: 15,
             ),
-            Container(
-              width: 80,
-              padding: EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: AppColors.faqanswerColor.withOpacity(0.5))),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text('Sort'),
-                    Icon(
-                      Icons.sort,
-                      color: AppColors.faqanswerColor.withOpacity(0.5),
-                    ),
-                  ],
+            InkWell(
+              onTap: (){
+                _showBottomSheetforSorting( context);
+              },
+              child: Container(
+                width: 80,
+                padding: EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: AppColors.faqanswerColor.withOpacity(0.5))),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Sort'),
+                      Icon(
+                        Icons.sort,
+                        color: AppColors.faqanswerColor.withOpacity(0.5),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -206,7 +212,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
         'start': '${widget.checkIn}',
         'end': '${widget.checkOut}',
         'price_range': '300;900',
-        'star_rate': '',
+       'star_rate': '',
         'review_score': '',
         'map_lat': '',
         'map_lgn': '',
@@ -287,82 +293,95 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            //height: 800,
-            color: const Color.fromRGBO(0, 0, 0, 0.001),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 2,
-                    color: AppColors.faqanswerColor,
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InkWell(
-                          onTap: () async {
-                            String date = await selectDate(context);
-
-                            checkInDate = date;
-
-                            formattedCheckInDate = DateFormat("dd MMM''yy")
-                                .format(DateTime.parse(date));
-                            checkInDayOfWeek =
-                                DateFormat("EEEE").format(DateTime.parse(date));
-                          },
-                          child: selectDateWidget('Check-in', checkInDayOfWeek,
-                              formattedCheckInDate, true, context)),
-                      const Icon(
-                        Icons.nights_stay,
-                        color: AppColors.faqanswerColor,
-                      ),
-                      InkWell(
-                          onTap: () async {
-                            String date = await selectDate(context);
-
-                            checkInDate = date;
-
-                            formattedCheckInDate = DateFormat("dd MMM''yy")
-                                .format(DateTime.parse(date));
-                            checkInDayOfWeek =
-                                DateFormat("EEEE").format(DateTime.parse(date));
-                          },
-                          child: selectDateWidget('Check-in', checkInDayOfWeek,
-                              formattedCheckInDate, true, context))
-                    ],
-                  ),
-                  TravelDetailsTile(),
-                  InkWell(
-                    onTap: () {
-                      widget.checkIn = DateFormat('yyyy-MM-dd')
-                          .format(DateTime.parse(checkInDate));
-                      widget.checkOut = DateFormat('yyyy-MM-dd')
-                          .format(DateTime.parse(checkOutDate));
-
-                      getSearchedHotel();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 08, 20, 08),
-                      child: CustomButton(textt: 'Update'),
+        return StatefulBuilder(
+          builder: (context, setState2) {
+            return SingleChildScrollView(
+              child: Container(
+                //height: 800,
+                color: const Color.fromRGBO(0, 0, 0, 0.001),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
                   ),
-                ],
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 2,
+                        color: AppColors.faqanswerColor,
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                              onTap: () async {
+                                String date = await selectDate(context);
+
+                                checkInDate = date;
+
+                                formattedCheckInDate = DateFormat("dd MMM''yy")
+                                    .format(DateTime.parse(date));
+                                checkInDayOfWeek =
+                                    DateFormat("EEEE").format(DateTime.parse(date));
+                                setState2(() {
+
+                                });
+
+                              },
+                              child: selectDateWidget('Check-in', checkInDayOfWeek,
+                                  formattedCheckInDate, true, context)),
+                          const Icon(
+                            Icons.nights_stay,
+                            color: AppColors.faqanswerColor,
+                          ),
+                          InkWell(
+                              onTap: () async {
+                                String date = await selectDate(context);
+
+                                checkOutDate = date;
+
+                                formattedCheckOutDate = DateFormat("dd MMM''yy")
+                                    .format(DateTime.parse(date));
+                                checkOutDayOfWeek =
+                                    DateFormat("EEEE").format(DateTime.parse(date));
+                                setState2(() {
+
+                                });
+                              },
+                              child: selectDateWidget('Check-out', checkOutDayOfWeek,
+                                  formattedCheckOutDate, true, context))
+                        ],
+                      ),
+                      TravelDetailsTile(),
+                      InkWell(
+                        onTap: () {
+                          widget.checkIn = DateFormat('yyyy-MM-dd')
+                              .format(DateTime.parse(checkInDate));
+                          widget.checkOut = DateFormat('yyyy-MM-dd')
+                              .format(DateTime.parse(checkOutDate));
+
+                          Navigator.pop(context);
+
+                          getSearchedHotel();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 08, 20, 08),
+                          child: CustomButton(textt: 'Update'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          }
         );
       },
     );
@@ -377,39 +396,106 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            //height: 800,
-            color: const Color.fromRGBO(0, 0, 0, 0.001),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+        return StatefulBuilder(
+          builder: (context,setState1) {
+            return SingleChildScrollView(
+              child: Container(
+                //height: 800,
+                color: const Color.fromRGBO(0, 0, 0, 0.001),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            width: 30,
+                            height: 2,
+                            color: AppColors.faqanswerColor,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          'Sort by',
+                          style: TextStyle(
+                              fontFamily: "Sofia",
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: sortList.length,
+                          itemBuilder: (context, index) {
+                            var item  = sortList[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: InkWell(
+                              onTap: (){
+                                sortList.forEach((element) {
+                                  element.isSelected = false ;
+                                });
+                                item.isSelected = true ;
+
+                                setState1((){});
+                                if(item.titel == 'Low to high') {
+                                  hotelList.sort((a, b) =>
+                                      (double.parse(a.price ?? '0.0'))
+                                          .compareTo(
+                                              double.parse(b.price ?? '0.0')));
+                                }else if(item.titel == 'High to low'){
+                                  hotelList.sort((a, b) =>
+                                      (double.parse(b.price ?? '0.0'))
+                                          .compareTo(
+                                          double.parse(a.price ?? '0.0')));
+                                }else {
+                                  hotelList.sort((a, b) =>
+                                      (double.parse(b.reviewScore?.scoreTotal ?? '0.0'))
+                                          .compareTo(
+                                          double.parse(a.reviewScore?.scoreTotal ?? '0.0')));
+                                }
+                                Navigator.pop(context);
+                                setState(() {});
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+
+                                Row(children: [
+                                  Icon(item.icon),
+                                  const SizedBox(width: 10,),
+                                  Text(item.titel ?? '',style: const TextStyle(
+                                      fontFamily: "Sofia",
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400),),
+                                ],),
+                                  item.isSelected ?? false ? const Icon(Icons.check): const SizedBox(),
+
+                              ],),
+                            ),
+                          );
+                        },)
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 2,
-                    color: AppColors.faqanswerColor,
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  const Text(
-                    'Sort by',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                ],
-              ),
-            ),
-          ),
+            );
+          }
         );
       },
     );
@@ -449,9 +535,10 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
   }
 
   List<Sort> sortList =[
-    Sort(icon: Icons.arrow_upward,titel: 'Low to high'),
-    Sort(icon: Icons.arrow_upward,titel: 'High to low'),
-    Sort(icon: Icons.arrow_upward,titel: 'High to low'),
+    Sort(icon: Icons.arrow_downward,titel: 'Low to high',isSelected: false),
+    Sort(icon: Icons.arrow_upward,titel: 'High to low',isSelected: false),
+    Sort(icon: Icons.score,titel: 'Review Score', isSelected: false),
+
   ];
 }
 
@@ -483,7 +570,7 @@ class card extends StatelessWidget {
         // List<String> description = List.from(list[i].data()['description']);
         String title = list?[i].title ?? 'title';
         // String type = list[i].data()['type'].toString();
-        double rating = list?[i].reviewScore?.totalReview?.toDouble() ?? 4.2;
+        double rating = double.parse( list?[i].reviewScore?.scoreTotal?? '4');
         String location = list?[i].location?.name ?? 'location';
         /*  String image =
               'https://media-cdn.tripadvisor.com/media/photo-m/1280/21/dc/28/e0/fortune-pandiyan-hotel.jpg';*/
@@ -501,6 +588,8 @@ class card extends StatelessWidget {
             children: <Widget>[
               InkWell(
                 onTap: () {
+
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => HotelDetailsScreen(),));
                   /*Navigator.of(context).push(PageRouteBuilder(
                         pageBuilder: (_, __, ___) => new TopChoiceDetail(
                           userId: dataUser,
