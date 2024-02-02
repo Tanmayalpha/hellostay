@@ -17,7 +17,7 @@ import '../../repository/apiStrings.dart';
 import 'homeView.dart';
 
 class HotelSearchScreen extends StatefulWidget {
-  const HotelSearchScreen(
+  HotelSearchScreen(
       {Key? key,
       this.title,
       this.userId,
@@ -30,7 +30,7 @@ class HotelSearchScreen extends StatefulWidget {
       this.children})
       : super(key: key);
   final String? title, userId;
-  final String? checkIn, checkOut, address, lat, long;
+  String? checkIn, checkOut, address, lat, long;
 
   final int? adults, children;
 
@@ -90,12 +90,11 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
         ),
         const SizedBox(height: 5.0),
         SizedBox(
-            height: 320.0,
             child: card(
-              list: hotelList,
-              /*dataUser: widget.userId,
+          list: hotelList,
+          /*dataUser: widget.userId,
             list: snapshot.data.docs,*/
-            )),
+        )),
         const SizedBox(
           height: 25.0,
         ),
@@ -118,7 +117,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                     onTap: () async {
                       _showBottomSheetforDate(context);
                     },
-                    child:  Text(
+                    child: Text(
                       '${widget.checkIn}',
                       style: TextStyle(color: AppColors.secondary),
                     )),
@@ -135,15 +134,15 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                 const SizedBox(
                   width: 15,
                 ),
-                 InkWell(
-                   onTap: (){
-                     _showBottomSheetforDate(context);
-                   },
-                   child: Text(
+                InkWell(
+                  onTap: () {
+                    _showBottomSheetforDate(context);
+                  },
+                  child: Text(
                     '${widget.checkOut}',
                     style: TextStyle(color: AppColors.secondary),
+                  ),
                 ),
-                 ),
                 const SizedBox(
                   width: 15,
                 ),
@@ -155,37 +154,43 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                 const SizedBox(
                   width: 15,
                 ),
-                 Text(
+                Text(
                   '${room} rooms',
                   style: TextStyle(color: AppColors.secondary),
                 ),
                 const SizedBox(
                   width: 15,
                 ),
-                 Text(
-                  '${childrenCount1+adultCount1} guest',
+                Text(
+                  '${childrenCount1 + adultCount1} guest',
                   style: TextStyle(color: AppColors.secondary),
                 ),
               ],
             ),
-            const SizedBox(height: 15,),
+            const SizedBox(
+              height: 15,
+            ),
             Container(
-                width: 80,
-                padding: EdgeInsets.all(3),
-                decoration: BoxDecoration(
+              width: 80,
+              padding: EdgeInsets.all(3),
+              decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.faqanswerColor.withOpacity(0.5))
-                ),
+                  border: Border.all(
+                      color: AppColors.faqanswerColor.withOpacity(0.5))),
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                const Text('Sort'),
-                Icon(Icons.sort, color: AppColors.faqanswerColor.withOpacity(0.5),),
-              ],),),
+                    const Text('Sort'),
+                    Icon(
+                      Icons.sort,
+                      color: AppColors.faqanswerColor.withOpacity(0.5),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const Divider(),
-
             _topAnaheim,
           ],
         ),
@@ -197,7 +202,16 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
   getSearchedHotel() async {
     try {
-      var params = {'start': '${widget.checkIn}', 'end': '${widget.checkOut}'};
+      var params = {
+        'start': '${widget.checkIn}',
+        'end': '${widget.checkOut}',
+        'price_range': '300;900',
+        'star_rate': '',
+        'review_score': '',
+        'map_lat': '',
+        'map_lgn': '',
+        'map_place': 'Near',
+      };
 
       List<Map<String, String>> guestsList = [];
 
@@ -208,6 +222,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
         };
         guestsList.add(guestData);
       }
+
 
       var data = addMapListToData(params, guestsList);
 
@@ -264,7 +279,6 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
   }
 
   void _showBottomSheetforDate(BuildContext context) {
-    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -306,15 +320,11 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
                             formattedCheckInDate = DateFormat("dd MMM''yy")
                                 .format(DateTime.parse(date));
-                            checkInDayOfWeek = DateFormat("EEEE")
-                                .format(DateTime.parse(date));
+                            checkInDayOfWeek =
+                                DateFormat("EEEE").format(DateTime.parse(date));
                           },
-                          child: selectDateWidget(
-                              'Check-in',
-                              checkInDayOfWeek,
-                              formattedCheckInDate,
-                              true,
-                              context)),
+                          child: selectDateWidget('Check-in', checkInDayOfWeek,
+                              formattedCheckInDate, true, context)),
                       const Icon(
                         Icons.nights_stay,
                         color: AppColors.faqanswerColor,
@@ -327,20 +337,28 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
                             formattedCheckInDate = DateFormat("dd MMM''yy")
                                 .format(DateTime.parse(date));
-                            checkInDayOfWeek = DateFormat("EEEE")
-                                .format(DateTime.parse(date));
+                            checkInDayOfWeek =
+                                DateFormat("EEEE").format(DateTime.parse(date));
                           },
-                          child: selectDateWidget(
-                              'Check-in',
-                              checkInDayOfWeek,
-                              formattedCheckInDate,
-                              true,
-                              context))
+                          child: selectDateWidget('Check-in', checkInDayOfWeek,
+                              formattedCheckInDate, true, context))
                     ],
                   ),
                   TravelDetailsTile(),
+                  InkWell(
+                    onTap: () {
+                      widget.checkIn = DateFormat('yyyy-MM-dd')
+                          .format(DateTime.parse(checkInDate));
+                      widget.checkOut = DateFormat('yyyy-MM-dd')
+                          .format(DateTime.parse(checkOutDate));
 
-
+                      getSearchedHotel();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 08, 20, 08),
+                      child: CustomButton(textt: 'Update'),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -351,7 +369,6 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
   }
 
   void _showBottomSheetforSorting(BuildContext context) {
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -382,11 +399,13 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                   const SizedBox(
                     height: 50,
                   ),
-                  const Text('Sort by', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),
-                  const SizedBox(height: 5,),
-
-
-
+                  const Text(
+                    'Sort by',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
                 ],
               ),
             ),
@@ -395,7 +414,6 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       },
     );
   }
-
 
   getHotelList(String element) async {
     /*var headers = {
@@ -429,34 +447,22 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       print(response.reasonPhrase);
     }*/
   }
-}
 
+  List<Sort> sortList =[
+    Sort(icon: Icons.arrow_upward,titel: 'Low to high'),
+    Sort(icon: Icons.arrow_upward,titel: 'High to low'),
+    Sort(icon: Icons.arrow_upward,titel: 'High to low'),
+  ];
+}
 
 class Sort {
   String? titel;
-  IconData? icon ;
+  IconData? icon;
+
   bool? isSelected;
 
   Sort({this.titel, this.icon, this.isSelected});
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class card extends StatelessWidget {
   final String? dataUser;
@@ -466,35 +472,36 @@ class card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        primary: false,
-        itemCount: list?.length ?? 0,
-        itemBuilder: (context, i) {
-          //List<String> photo = List.from(list[i].data()['photo']);
-          // List<String> service = List.from(list[i].data()['service']);
-          // List<String> description = List.from(list[i].data()['description']);
-          String title = 'title';
-          // String type = list[i].data()['type'].toString();
-          double rating = 4.5;
-          String location = 'location';
-          String image =
-              'https://media-cdn.tripadvisor.com/media/photo-m/1280/21/dc/28/e0/fortune-pandiyan-hotel.jpg';
-          String id = 'id2';
-          num price = 1500;
-          //num latLang1 = list[i].data()['latLang1'];
-          // num latLang2 = list[i].data()['latLang2'];
+    return GridView.builder(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      primary: false,
+      itemCount: list?.length ?? 0,
+      itemBuilder: (context, i) {
+        //List<String> photo = List.from(list[i].data()['photo']);
+        // List<String> service = List.from(list[i].data()['service']);
+        // List<String> description = List.from(list[i].data()['description']);
+        String title = list?[i].title ?? 'title';
+        // String type = list[i].data()['type'].toString();
+        double rating = list?[i].reviewScore?.totalReview?.toDouble() ?? 4.2;
+        String location = list?[i].location?.name ?? 'location';
+        /*  String image =
+              'https://media-cdn.tripadvisor.com/media/photo-m/1280/21/dc/28/e0/fortune-pandiyan-hotel.jpg';*/
+        String image = list?[i].image ?? '';
+        String id = list?[i].id.toString() ?? '';
+        String price = list?[i].price ?? '5000';
+        //num latLang1 = list[i].data()['latLang1'];
+        // num latLang2 = list[i].data()['latLang2'];
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                InkWell(
-                  onTap: () {
-                    /*Navigator.of(context).push(PageRouteBuilder(
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              InkWell(
+                onTap: () {
+                  /*Navigator.of(context).push(PageRouteBuilder(
                         pageBuilder: (_, __, ___) => new TopChoiceDetail(
                           userId: dataUser,
                           titleD: title,
@@ -518,105 +525,107 @@ class card extends StatelessWidget {
                             child: child,
                           );
                         }));*/
-                  },
-                  child: Hero(
-                    tag: 'hero-tag-${id}',
-                    child: Material(
-                      child: Container(
-                        height: 220.0,
-                        width: 160.0,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: NetworkImage(image), fit: BoxFit.cover),
-                            color: Colors.black12,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                  blurRadius: 5.0,
-                                  color: Colors.black12.withOpacity(0.1),
-                                  spreadRadius: 2.0)
-                            ]),
-                      ),
+                },
+                child: Hero(
+                  tag: 'hero-tag-${id}',
+                  child: Material(
+                    child: Container(
+                      height: 180.0,
+                      width: 160.0,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: NetworkImage(image), fit: BoxFit.cover),
+                          color: Colors.black12,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(10.0)),
+                          boxShadow: [
+                            BoxShadow(
+                                blurRadius: 5.0,
+                                color: Colors.black12.withOpacity(0.1),
+                                spreadRadius: 2.0)
+                          ]),
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 5.0,
-                ),
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontFamily: "Sofia",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 17.0,
-                      color: Colors.black87),
-                ),
-                const SizedBox(
-                  height: 2.0,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Icon(
-                      Icons.location_on,
-                      size: 18.0,
-                      color: Colors.black12,
-                    ),
-                    Text(
-                      location,
+              ),
+              const SizedBox(
+                height: 5.0,
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                    fontFamily: "Sofia",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17.0,
+                    color: Colors.black87),
+              ),
+              const SizedBox(
+                height: 2.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Icon(
+                    Icons.location_on,
+                    size: 18.0,
+                    color: Colors.black12,
+                  ),
+                  Text(
+                    location,
+                    style: const TextStyle(
+                        fontFamily: "Sofia",
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15.0,
+                        color: Colors.black26),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const Icon(
+                    Icons.star,
+                    size: 18.0,
+                    color: Colors.yellow,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3.0),
+                    child: Text(
+                      rating.toString(),
                       style: const TextStyle(
+                          fontWeight: FontWeight.w700,
                           fontFamily: "Sofia",
-                          fontWeight: FontWeight.w500,
-                          fontSize: 15.0,
-                          color: Colors.black26),
+                          fontSize: 13.0),
                     ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Icon(
-                      Icons.star,
-                      size: 18.0,
-                      color: Colors.yellow,
+                  ),
+                  const SizedBox(
+                    width: 35.0,
+                  ),
+                  Container(
+                    height: 27.0,
+                    width: 82.0,
+                    decoration: const BoxDecoration(
+                        color: Color(0xFF09314F),
+                        borderRadius: BorderRadius.all(Radius.circular(20.0))),
+                    child: Center(
+                      child: Text("\u{20B9} $price",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13.0)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 3.0),
-                      child: Text(
-                        rating.toString(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontFamily: "Sofia",
-                            fontSize: 13.0),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 35.0,
-                    ),
-                    Container(
-                      height: 27.0,
-                      width: 82.0,
-                      decoration: const BoxDecoration(
-                          color: Color(0xFF09314F),
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(20.0))),
-                      child: Center(
-                        child: Text("\$ " + price.toString(),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13.0)),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
+                  )
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, childAspectRatio: 0.5),
+    );
   }
 }
 
