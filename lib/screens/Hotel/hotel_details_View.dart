@@ -804,7 +804,7 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
   getHotelDetail(String idD) async {
     
     
-    apiBaseHelper.getAPICall(Uri.parse('${baseUrl1}hotel/detail/3')).then((getData) {
+    apiBaseHelper.getAPICall(Uri.parse('${baseUrl1}hotel/detail/$idD')).then((getData) {
 
 
       String status = getData['status'].toString();

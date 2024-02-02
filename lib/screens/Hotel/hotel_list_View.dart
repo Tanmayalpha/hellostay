@@ -3,11 +3,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:hellostay/constants/colors.dart';
+import 'package:hellostay/model/filtersModel.dart';
 import 'package:hellostay/model/hotel_search_response.dart';
 import 'package:hellostay/repository/apiConstants.dart';
 import 'package:hellostay/screens/Hotel/hotel_details_View.dart';
 import 'package:hellostay/utils/date_function.dart';
 import 'package:hellostay/utils/draggable_sheet.dart';
+import 'package:hellostay/utils/filtersheet.dart';
 import 'package:hellostay/utils/traver_tile.dart';
 import 'package:hellostay/widgets/custom_app_button.dart';
 import 'package:hellostay/widgets/select_date_widget.dart';
@@ -45,6 +47,9 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 //  Api api = Api();
 
   var data;
+  RangeValues _selectedRange = const RangeValues(356, 555);
+  RangeValues _selectedRangeStar = const RangeValues(0, 5);
+  List<SelectedModel> selectedItems = [];
 
   @override
   void initState() {
@@ -56,6 +61,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
   inIt() async {
     await getSearchedHotel();
+    await getProductFilters( context);
   }
 
   @override
@@ -141,7 +147,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                   },
                   child: Text(
                     '${widget.checkOut}',
-                    style: TextStyle(color: AppColors.secondary),
+                    style: const TextStyle(color: AppColors.secondary),
                   ),
                 ),
                 const SizedBox(
@@ -157,44 +163,94 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
                 ),
                 Text(
                   '${room} rooms',
-                  style: TextStyle(color: AppColors.secondary),
+                  style: const TextStyle(color: AppColors.secondary),
                 ),
                 const SizedBox(
                   width: 15,
                 ),
                 Text(
                   '${childrenCount1 + adultCount1} guest',
-                  style: TextStyle(color: AppColors.secondary),
+                  style: const TextStyle(color: AppColors.secondary),
                 ),
               ],
             ),
             const SizedBox(
               height: 15,
             ),
-            InkWell(
-              onTap: (){
-                _showBottomSheetforSorting( context);
-              },
-              child: Container(
-                width: 80,
-                padding: EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: AppColors.faqanswerColor.withOpacity(0.5))),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const Text('Sort'),
-                      Icon(
-                        Icons.sort,
-                        color: AppColors.faqanswerColor.withOpacity(0.5),
+            Row(
+              children: [
+                InkWell(
+                  onTap: (){
+                    _showBottomSheetforSorting( context);
+                  },
+                  child: Container(
+                    width: 80,
+                    padding: EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: AppColors.faqanswerColor.withOpacity(0.5))),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Text('Sort'),
+                          Icon(
+                            Icons.sort,
+                            color: AppColors.faqanswerColor.withOpacity(0.5),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: false,
+                    builder: (BuildContext context) {
+                      return BottomSheetContent(
+                        selectedRange: _selectedRange,
+                        selectedItems: selectedItems,
+                        onChangedRange: (newRange) {
+                          setState(() {
+                            _selectedRange = newRange;
+                          });
+                        },
+                        onChangedItems: (newItems) {
+                          setState(() {
+                            selectedItems = newItems;
+                          });
+                          getSearchedHotel();
+                        },
+                        filterListt: filterModel,
+                        selectedRangeStar: _selectedRangeStar,
+                      );
+                    },
+                  ),
+                  child: Container(
+                    width: 80,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: AppColors.faqanswerColor.withOpacity(0.5))),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Text('Filters'),
+                          Icon(
+                            Icons.filter_list_outlined,
+                            color: AppColors.faqanswerColor.withOpacity(0.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const Divider(),
             _topAnaheim,
@@ -211,15 +267,17 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       var params = {
         'start': '${widget.checkIn}',
         'end': '${widget.checkOut}',
-        'price_range': '300;900',
-       'star_rate': '',
+        'price_range': '${_selectedRange.start};${_selectedRange.end}',
+        'star_rate': '',
         'review_score': '',
         'map_lat': '',
         'map_lgn': '',
         'map_place': 'Near',
       };
+print('${params}');
 
       List<Map<String, String>> guestsList = [];
+      List<Map<String, String>> guestsList1 = [];
 
       for (int i = 0; i < adultCountList.length; i++) {
         Map<String, String> guestData = {
@@ -231,8 +289,17 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
 
 
       var data = addMapListToData(params, guestsList);
+      for (int i = 0; i < selectedItems.length; i++) {
+        Map<String, String> guestData = {
+          'terms[$i]': selectedItems[i].id.toString(),
 
-      apiBaseHelper.postAPICall(hotelSearch, data).then((getData) {
+        };
+        guestsList1.add(guestData);
+      }
+
+      var data1 = addMapListToData(data, guestsList1);
+
+      apiBaseHelper.postAPICall(hotelSearch, data1).then((getData) {
         hotelList = HotelSearchResponse.fromJson(getData).data ?? [];
 
         setState(() {});
@@ -386,7 +453,7 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
       },
     );
   }
-
+  List<FiltersModelDatum> filterModel = [];
   void _showBottomSheetforSorting(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -501,38 +568,33 @@ class _HotelSearchScreenState extends State<HotelSearchScreen> {
     );
   }
 
-  getHotelList(String element) async {
-    /*var headers = {
-      'Content-Type': 'application/json',
-      'apikey': apiKey
-    };
-    var request =
-    http.Request('POST', Uri.parse('${flightUrl}hms/v1/hotel-search'));
-    request.body = json.encode({"searchId": element});
-    request.headers.addAll(headers);
+  Future<void> getProductFilters(BuildContext context) async {
+    await filterListRequest(
+        "${baseUrl1}hotel/filters")
+        .then((value) {
+      filterModel = value.data;
 
-    print('${request.body}');
-
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 200) {
-      var finalResult = await response.stream.bytesToString();
-
-      final jsonResponse =
-      HotelSearchListData.fromJson(json.decode(finalResult));
-
-      hotelSearchListData = jsonResponse;
-      // hotels.clear();
-
-      hotels = hotelSearchListData?.searchResult?.his ?? [];
-
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      print(response.reasonPhrase);
-    }*/
+      setState(() {});
+    }).onError((error, stackTrace) {
+      print(error.toString() + "product filter error");
+      print(stackTrace.toString() + "product filter error");
+    });
   }
+
+  Future<FiltersModel> filterListRequest(String api) async {
+    final url = Uri.parse(api);
+
+    final http.Response res;
+    res = await http.get(url);
+
+    print(res.body);
+    var asn = await json.decode(res.body);
+
+    return FiltersModel.fromJson(asn);
+  }
+
+
+
 
   List<Sort> sortList =[
     Sort(icon: Icons.arrow_downward,titel: 'Low to high',isSelected: false),
@@ -559,7 +621,14 @@ class card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    return list?.isEmpty ?? true ? Center(
+      child: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height/4,),
+          const Text('Hotel Not Found'),
+        ],
+      ),
+    ) :  GridView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       primary: false,
@@ -589,7 +658,7 @@ class card extends StatelessWidget {
               InkWell(
                 onTap: () {
 
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HotelDetailsScreen(),));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) =>  HotelDetailsScreen(idD: id),));
                   /*Navigator.of(context).push(PageRouteBuilder(
                         pageBuilder: (_, __, ___) => new TopChoiceDetail(
                           userId: dataUser,

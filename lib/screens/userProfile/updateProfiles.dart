@@ -62,6 +62,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 )),
       appBar: AppBar(
         centerTitle: true,
+
         title: const Text(
           'Edit Profile',
           style: TextStyle(
@@ -165,7 +166,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
 
                     TextFormField(
-                      controller: usernamecontroller,
+                      controller: bussinessnamecontroller,
+                      // controller: usernamecontroller,
                       decoration: InputDecoration(
                         prefixIcon: const Icon(
                           Icons.person,
@@ -928,7 +930,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       'user_name': usernamecontroller.text,
       'email': emailC.text,
       'first_name': firstNmaeController.text,
-      'last_name': emailC.text,
+      'last_name': lastNmaecontroller.text,
       'phone': mobilecontroller.text,
       'birthday': dateofbirthcontroller.text,
       'bio': aboutuscontroller.text,

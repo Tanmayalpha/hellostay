@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hellostay/constants/colors.dart';
+import 'package:hellostay/model/trendingHotelModel.dart';
+import 'package:hellostay/repository/apiConstants.dart';
 import 'package:hellostay/screens/Hotel/hotel_list_View.dart';
 import 'package:hellostay/utils/address_search.dart';
 import 'package:hellostay/utils/date_function.dart';
@@ -86,6 +89,8 @@ class _HotelHomePageState extends State<HotelHomePage> {
     checkInDayOfWeek = DateFormat("EEEE").format(DateTime.parse(checkInDate));
     formattedCheckOutDate = DateFormat("dd MMM''yy").format(DateTime.parse(checkOutDate));
     checkOutDayOfWeek = DateFormat("EEEE").format(DateTime.parse(checkOutDate));
+    trendingHotel();
+    getLocationApi();
   }
 
  // Payload? cityId;
@@ -442,21 +447,33 @@ class _HotelHomePageState extends State<HotelHomePage> {
             ),
           ),
 
-
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: Text("Top Destinations",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+            ),
+          ),
           SliverToBoxAdapter(child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-              child: Row(children: List<Widget>.generate(100, (index) =>_buildRooms(context,index) ))),),
+              child: Row(children: List<Widget>.generate(images.length, (index) =>_buildRooms(context,index) ))),),
+          const SliverToBoxAdapter(child: SizedBox(height: 10),),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: Text("Trending",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+            ),
+          ),
 
           SliverToBoxAdapter(child: StaggeredGridView.countBuilder(
               crossAxisCount: 2,
               crossAxisSpacing: 5,
               mainAxisSpacing: 5,
-              itemCount: 10,
+              itemCount: imageTrendingModel?.data?.length ?? 0,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) => _buildRooms2(context,index),
               staggeredTileBuilder: (index) {
-          return  StaggeredTile.count(1, index.isEven ? 1.5 : 2);
+          return  StaggeredTile.count(1, index.isEven ? 1.5 : 1.8);
           })
                 ),
 
@@ -473,6 +490,9 @@ class _HotelHomePageState extends State<HotelHomePage> {
 
  // CitySearchModel? citySearchModel;
   dynamic citySearchModel;
+  TrendingHotelModel? imageTrendingModel ;
+  List images=[];
+  List city=[];
   searchApi(String value) async {
     var headers = {
       'apikey': 'apiKey'
@@ -498,26 +518,52 @@ class _HotelHomePageState extends State<HotelHomePage> {
 
   }
 
-  getCityList() async {
-    var headers = {'apikey': 'apiKey'};
-    var request =
-    http.Request('GET', Uri.parse('${'flightUrl'}/hms/v1/static-cities/'));
-    request.body = '''''';
-    request.headers.addAll(headers);
+  trendingHotel() async {
+    var request = http.Request('GET', Uri.parse("${baseUrl1}hotel/trending")); http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
 
+      var finalResponse = await response.stream.bytesToString();
+
+      final finalResult = TrendingHotelModel.fromJson(json.decode(finalResponse));
+      setState(() {
+        imageTrendingModel= finalResult;
+
+      });
+
+
+    }
+    else {
+      print(response.reasonPhrase);
+      print("api not run");
+    }
+
+
+  }
+
+  getLocationApi() async {
+    var request = http.Request('GET', Uri.parse('${baseUrl1}locations'));
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      var finalResult = await response.stream.bytesToString();
-
-   //   final jsonResponse = CityListResponse.fromJson(json.decode(finalResult));
+      var finalResponse = await response.stream.bytesToString();
+      var finaResult = jsonDecode(finalResponse);
+      // print(await response.stream.bytesToString());
+      for(Map i in finaResult['data']) {
+        images.add(i["image"]);
+        city.add(i["title"]);
+      }
       setState(() {
-      //  cityListResponse = jsonResponse;
       });
-    } else {
+
+    }
+    else {
       print(response.reasonPhrase);
     }
+
+
   }
+
+
 
   Widget _buildRooms(BuildContext context, int index) {
     var room = rooms[index % rooms.length];
@@ -537,88 +583,95 @@ class _HotelHomePageState extends State<HotelHomePage> {
             children: <Widget>[
               Stack(
                 children: <Widget>[
-                  Image.network(room['image'],height: 200, ),
-                  Positioned(
-                    right: 10,
-                    top: 10,
-                    child: Icon(
-                      Icons.star,
-                      color: Colors.grey.shade800,
-                      size: 20.0,
+                  // Image.network(images[index],height: 200,),
+                  Container(
+                    height: 200,
+
+
+                    decoration: BoxDecoration(
+                        color: Colors.black45.withOpacity(0.1),
+                        image: DecorationImage(
+                            image: NetworkImage(images[index]),fit:BoxFit.cover
+                        )
                     ),
                   ),
-                  const Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Icon(
-                      Icons.star_border,
-                      color: Colors.white,
-                      size: 24.0,
-                    ),
-                  ),
+                  // Positioned(
+                  //   right: 10,
+                  //   top: 10,
+                  //   child: Icon(
+                  //     Icons.star,
+                  //     color: Colors.grey.shade800,
+                  //     size: 20.0,
+                  //   ),
+                  // ),
                   Positioned(
-                    bottom: 20.0,
-                    right: 10.0,
-                    child: Container(
-                      padding: const EdgeInsets.all(10.0),
-                      color: Colors.white,
-                      child: const Text("\$40"),
-                    ),
-                  )
+                      left: 8,
+                      top: 8,
+                      child: Text(city[index],style: const TextStyle(color: Colors.white,fontSize: 20),)
+                  ),
+                  // Positioned(
+                  //   bottom: 20.0,
+                  //   right: 10.0,
+                  //   child: Container(
+                  //     padding: const EdgeInsets.all(10.0),
+                  //     color: Colors.white,
+                  //     child: const Text("\$40"),
+                  //   ),
+                  // )
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      room['title'],
-                      style: const TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(
-                      height: 5.0,
-                    ),
-                    const Text("Bouddha, Kathmandu"),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    const Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.star,
-                          color: Colors.green,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.green,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.green,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.green,
-                        ),
-                        Icon(
-                          Icons.star,
-                          color: Colors.green,
-                        ),
-                        SizedBox(
-                          width: 5.0,
-                        ),
-                        Text(
-                          "(220 reviews)",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.all(16.0),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: <Widget>[
+              //       Text(
+              //         room['title'],
+              //         style: const TextStyle(
+              //             fontSize: 18.0, fontWeight: FontWeight.bold),
+              //       ),
+              //       const SizedBox(
+              //         height: 5.0,
+              //       ),
+              //       const Text("Bouddha, Kathmandu"),
+              //       const SizedBox(
+              //         height: 10.0,
+              //       ),
+              //       const Row(
+              //         crossAxisAlignment: CrossAxisAlignment.center,
+              //         children: <Widget>[
+              //           Icon(
+              //             Icons.star,
+              //             color: Colors.green,
+              //           ),
+              //           Icon(
+              //             Icons.star,
+              //             color: Colors.green,
+              //           ),
+              //           Icon(
+              //             Icons.star,
+              //             color: Colors.green,
+              //           ),
+              //           Icon(
+              //             Icons.star,
+              //             color: Colors.green,
+              //           ),
+              //           Icon(
+              //             Icons.star,
+              //             color: Colors.green,
+              //           ),
+              //           SizedBox(
+              //             width: 5.0,
+              //           ),
+              //           Text(
+              //             "(220 reviews)",
+              //             style: TextStyle(color: Colors.grey),
+              //           )
+              //         ],
+              //       )
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -626,8 +679,13 @@ class _HotelHomePageState extends State<HotelHomePage> {
     );
   }
 
+
+
+
+
   Widget _buildRooms2(BuildContext context, int index) {
     var room = rooms[index % rooms.length];
+    var item=imageTrendingModel?.data?[index];
     return ClipRRect(
       borderRadius: BorderRadius.circular(5.0),
       child: Material(
@@ -640,7 +698,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
           children: <Widget>[
             Stack(
               children: <Widget>[
-                Image.network(room['image'] ),
+                Image.network(item?.image?? "" ),
                 Positioned(
                   right: 10,
                   top: 10,
@@ -665,7 +723,7 @@ class _HotelHomePageState extends State<HotelHomePage> {
                   child: Container(
                     padding: const EdgeInsets.all(10.0),
                     color: Colors.white,
-                    child: const Text("\$40"),
+                    child:  Text("\u{20B9} ${item?.price?? "" }"),
                   ),
                 )
               ],
@@ -676,46 +734,62 @@ class _HotelHomePageState extends State<HotelHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    room['title'],
+                    item?.title?? "" ,
                     style: const TextStyle(
-                        fontSize: 18.0, fontWeight: FontWeight.bold),
+                        fontSize: 15.0, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 5.0,
                   ),
-                  const Text("Bouddha, Kathmandu"),
+                  Text(item?.location?.name?? "" ),
                   const SizedBox(
                     height: 10.0,
                   ),
-                  const Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Icon(
-                        Icons.star,
-                        color: Colors.green,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.green,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.green,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.green,
-                      ),
-                      Icon(
-                        Icons.star,
-                        color: Colors.green,
-                      ),
-                      SizedBox(
+                      IgnorePointer(
+                        ignoring: true,
+                        child: RatingBar.builder(
+                          initialRating: item?.reviewScore?.totalReview is int
+                              ? (item?.reviewScore?.totalReview as int).toDouble()
+                              : double.tryParse(item?.reviewScore?.totalReview?.toString() ?? "") ?? 0.0,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          allowHalfRating: false,
+                          itemCount: 5,
+                          itemSize: 12.0,
+                          itemBuilder: (context, _) => Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          onRatingUpdate: (_) {}, // Provide an empty function to disable editing
+                        ),
+                      )
+
+                      // const Icon(
+                      //   Icons.star,
+                      //   color: Colors.green,size: 10,
+                      // ),const Icon(
+                      //   Icons.star,
+                      //   color: Colors.green,size: 10,
+                      // ),const Icon(
+                      //   Icons.star,
+                      //   color: Colors.green,size: 10,
+                      // ),const Icon(
+                      //   Icons.star,
+                      //   color: Colors.green,size: 10,
+                      // ),const Icon(
+                      //   Icons.star,
+                      //   color: Colors.green,size: 10,
+                      // ),
+
+                      ,SizedBox(
                         width: 5.0,
                       ),
                       Text(
-                        "(220 reviews)",
-                        style: TextStyle(color: Colors.grey),
+                        'Total Review ${item?.reviewScore?.totalReview?? ""} ' ,
+                        style: const TextStyle(color: Colors.grey,fontSize: 10),
                       )
                     ],
                   )
@@ -727,15 +801,6 @@ class _HotelHomePageState extends State<HotelHomePage> {
       ),
     );
   }
-
-
-
-
-
-
-
-
-
 
 
   Widget getTimeDateUI(BuildContext context) {
